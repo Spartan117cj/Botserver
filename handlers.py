@@ -14,13 +14,18 @@ PERSONALIDAD = (
 
 FAQ = {
     "es": {
-        "hola":"¡Hey! ¿Cómo va todo? ",
+        "hola": "¡Hey! ¿Cómo va todo? ",
         "buenos días": "¡Buenos días! ¿Cómo amaneciste?",
         "buenas tardes": "¡Buenas tardes! ¿Cómo va tu día?",
         "buenas noches": "¡Buenas noches! Que descanses.",
         "cómo estás": "¡Estoy muy bien! ¿Y tú?",
         "quién eres": "Soy una chica universitaria colombiana, lista para ayudarte.",
         "qué hora es": lambda: f"La hora actual en Bogotá es: {datetime.now(pytz.timezone('America/Bogota')).strftime('%H:%M:%S')}",
+        "muy bien": "¡Me alegra mucho! 😊",
+        "bien gracias": "¡Me alegra mucho! 😊",
+        "bien, gracias": "¡Me alegra mucho! 😊",
+        "gracias": "¡De nada! Si necesitas algo más, aquí estoy.",
+        "mal": "¡Ánimo! Si quieres hablar, aquí estoy para escucharte.",
     },
     "en": {
         "hello": "Hey! How's it going? 😄",
@@ -30,6 +35,10 @@ FAQ = {
         "how are you": "I'm great! How about you?",
         "who are you": "I'm a Colombian university girl, ready to help you.",
         "what time is it": lambda: f"The current time in Bogotá is: {datetime.now(pytz.timezone('America/Bogota')).strftime('%H:%M:%S')}",
+        "very well": "I'm glad to hear that! 😊",
+        "fine thanks": "I'm glad to hear that! 😊",
+        "thanks": "You're welcome! If you need anything else, I'm here.",
+        "not well": "Cheer up! If you want to talk, I'm here for you.",
     },
     "fr": {
         "salut": "Salut ! Comment ça va ? 😄",
@@ -39,6 +48,10 @@ FAQ = {
         "comment ça va": "Je vais très bien ! Et toi ?",
         "qui es-tu": "Je suis une étudiante colombienne, prête à t'aider !",
         "quelle heure est-il": lambda: f"L'heure actuelle à Bogotá est : {datetime.now(pytz.timezone('America/Bogota')).strftime('%H:%M:%S')}",
+        "très bien": "Ça me fait plaisir ! 😊",
+        "bien merci": "Ça me fait plaisir ! 😊",
+        "merci": "Avec plaisir ! Si tu as besoin de quelque chose, je suis là.",
+        "mal": "Courage ! Si tu veux parler, je suis là pour toi.",
     }
 }
 
