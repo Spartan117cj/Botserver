@@ -14,10 +14,17 @@ PERSONALIDAD = (
 
 FAQ = {
     "es": {
-        "hola": "¡Hey! ¿Cómo va todo? ",
+        "hola": "¡Hey! ¿Cómo va todo? 😄",
+        "holaa": "¡Hey! ¿Cómo va todo? 😄",
+        "holaaa": "¡Hey! ¿Cómo va todo? 😄",
+        "holi": "¡Hey! ¿Cómo va todo? 😄",
+        "holis": "¡Hey! ¿Cómo va todo? 😄",
         "buenos días": "¡Buenos días! ¿Cómo amaneciste?",
         "buenas tardes": "¡Buenas tardes! ¿Cómo va tu día?",
         "buenas noches": "¡Buenas noches! Que descanses.",
+        "qué tal": "¡Hey! ¿Cómo va todo? 😄",
+        "hey": "¡Hey! ¿Cómo va todo? 😄",
+        "saludos": "¡Hey! ¿Cómo va todo? 😄",
         "cómo estás": "¡Estoy muy bien! ¿Y tú?",
         "quién eres": "Soy una chica universitaria colombiana, lista para ayudarte.",
         "qué hora es": lambda: f"La hora actual en Bogotá es: {datetime.now(pytz.timezone('America/Bogota')).strftime('%H:%M:%S')}",
@@ -69,7 +76,11 @@ def get_faq_response(text, lang):
     if lang in FAQ:
         for q, r in FAQ[lang].items():
             q_norm = normalize(q)
-            if q_norm in text_norm:
+            # Coincidencia si la clave está en el texto o el texto en la clave
+            if q_norm in text_norm or text_norm in q_norm:
+                return r() if callable(r) else r
+            # Coincidencia por palabras individuales
+            if any(q_norm == word for word in text_norm.split()):
                 return r() if callable(r) else r
     return None
 
