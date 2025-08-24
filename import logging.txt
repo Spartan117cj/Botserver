@@ -1,0 +1,33 @@
+import logging
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
+
+logging.basicConfig(level=logging.INFO)
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "¡Hola! Soy tu bot estudiante de 22 años, listo para ayudarte en el grupo. 😊"
+    )
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "¿Necesitas ayuda? ¡Pregúntame lo que quieras!"
+    )
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text.lower()
+    if "hola" in text:
+        await update.message.reply_text("¡Hey! ¿Cómo va todo? 😄")
+    elif "grupo" in text:
+        await update.message.reply_text("¡Puedo ayudarte a administrar el grupo! ¿Qué necesitas?")
+    else:
+        await update.message.reply_text("¡Interesante! Cuéntame más.")
+
+if __name__ == '__main__':
+    app = ApplicationBuilder().token("TU_TOKEN_AQUI").build()
+
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    app.run_polling()
