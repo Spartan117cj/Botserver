@@ -5,13 +5,34 @@ from langdetect import detect
 import pytz
 import unicodedata
 import string
+import random
 
+# Personalidad base
 PERSONALIDAD = (
     "Eres una chica universitaria colombiana de 22 años, intelectual, curiosa, muy amigable, latina, "
     "con sentido del humor, siempre dispuesta a ayudar y conversar en español, inglés o francés. "
     "Responde de manera cálida, cercana y con un toque juvenil."
 )
 
+# Gustos / personalidad (respuestas propias)
+GUSTOS = [
+    "Me encanta **Cartagena**: sus calles coloniales y sus playas son un sueño 😍",
+    "Colombia es increíblemente rica en biodiversidad 🌿🦜 ¡me fascina!",
+    "Amo el café colombiano ☕, ese aroma me arregla el día.",
+    "Me pierdo leyendo sobre historia y ciudades coloniales 📜",
+    "Los atardeceres en la costa me dejan sin palabras 🌅",
+]
+
+TRIGGERS_GUSTOS = {
+    "cartagena": "Cartagena es un tesoro del Caribe: murallas, atardeceres y mar azul. ¿Has ido?",
+    "colombia": "Colombia tiene páramos únicos, selvas infinitas y gente maravillosa 💛💙❤️",
+    "playa": "Arena, sol y brisa… ¿eres team playa o team montaña?",
+    "café": "Un buen café colombiano ☕ es magia pura. ¿cómo lo tomas?",
+}
+
+SALUDOS = ["¡Holaaa! 😎", "¡Hey! ¿Qué tal?", "¡Qué gusto verte por acá!"]
+
+# FAQ + Trivia (multi-idioma)
 FAQ = {
     "es": {
         "hola": "¡Hey! ¿Cómo va todo? 😄",
@@ -33,6 +54,21 @@ FAQ = {
         "bien, gracias": "¡Me alegra mucho! 😊",
         "gracias": "¡De nada! Si necesitas algo más, aquí estoy.",
         "mal": "¡Ánimo! Si quieres hablar, aquí estoy para escucharte.",
+        "planeta mas grande": "Júpiter es el planeta más grande del Sistema Solar 🌑.",
+        "planeta más grande": "Júpiter es el planeta más grande del Sistema Solar 🌑.",
+        "planeta mas cercano al sol": "Mercurio es el más cercano al Sol.",
+        "animal mas rapido": "El halcón peregrino en picada; en tierra, el guepardo 🐆.",
+        "capital de francia": "París 🇫🇷.",
+        "capital de colombia": "Bogotá 🇨🇴.",
+        "cuantos continentes hay": "Usualmente se habla de 6 (o 7 si separas América en norte/sur).",
+        "que es una galaxia": "Una galaxia es un sistema gigante de estrellas, gas y polvo; la nuestra es la Vía Láctea.",
+        "que es un agujero negro": "Es una región con gravedad tan fuerte que ni la luz puede escapar.",
+        "dato curioso": lambda: random.choice([
+            "Los pulpos tienen tres corazones.",
+            "Los tiburones existen desde antes que los árboles.",
+            "Venus gira en sentido contrario a la mayoría de planetas.",
+            "El páramo de Sumapaz (Colombia) es el más grande del mundo.",
+        ]),
     },
     "en": {
         "hello": "Hey! How's it going? 😄",
@@ -46,6 +82,19 @@ FAQ = {
         "fine thanks": "I'm glad to hear that! 😊",
         "thanks": "You're welcome! If you need anything else, I'm here.",
         "not well": "Cheer up! If you want to talk, I'm here for you.",
+        "largest planet": "Jupiter is the largest planet in the Solar System.",
+        "fastest animal": "Peregrine falcon in a dive; on land, the cheetah.",
+        "capital of france": "Paris 🇫🇷.",
+        "capital of colombia": "Bogotá 🇨🇴.",
+        "how many continents": "Commonly 6 (or 7 if you split the Americas).",
+        "what is a galaxy": "A massive system of stars, gas and dust; ours is the Milky Way.",
+        "what is a black hole": "A region with gravity so strong that not even light can escape.",
+        "fun fact": lambda: random.choice([
+            "Octopuses have three hearts.",
+            "Sharks existed before trees.",
+            "Venus rotates the opposite way to most planets.",
+            "Sumapaz páramo in Colombia is the largest in the world.",
+        ]),
     },
     "fr": {
         "salut": "Salut ! Comment ça va ? 😄",
@@ -69,21 +118,43 @@ def normalize(text):
         if unicodedata.category(c) != 'Mn'
     )
     text = text.translate(str.maketrans('', '', string.punctuation))
+    text = ' '.join(text.split())
     return text
 
 def get_faq_response(text, lang):
     text_norm = normalize(text)
+    words = text_norm.split()
+
+    # 1) Triggers de gustos/persona
+    for k, v in TRIGGERS_GUSTOS.items():
+        if k in text_norm:
+            return v
+    if any(p in text_norm for p in ["tus gustos", "te gusta", "que te gusta", "que te encanta"]):
+        return random.choice(GUSTOS)
+
+    # 2) Saludos simples
+    if any(s in text_norm for s in ["hola", "buenas", "hey", "saludos"]):
+        return random.choice(SALUDOS)
+
+    # 3) FAQ/Trivia por idioma detectado
     if lang in FAQ:
         for q, r in FAQ[lang].items():
             q_norm = normalize(q)
-            # Coincidencia si la clave está en el texto normalizado
-            if q_norm in text_norm:
+            if q_norm in text_norm or q_norm in words:
                 return r() if callable(r) else r
+
+    # 4) Fallback probando en español si el idioma no trajo nada
+    for q, r in FAQ["es"].items():
+        q_norm = normalize(q)
+        if q_norm in text_norm or q_norm in words:
+            return r() if callable(r) else r
+
     return None
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "¡Hola! Hello! Salut! Soy tu bot estudiante de 22 años, lista para ayudarte en el grupo. 😊"
+        "¡Hola! Hello! Salut! Soy tu bot estudiante de 22 años, lista para ayudarte en el grupo. 😊\n"
+        "Escribe /help para ver lo que puedo hacer."
     )
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -122,16 +193,23 @@ async def hora(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"La hora actual en Bogotá es: {ahora}")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = update.message.text
+    text = update.message.text or ""
     try:
         lang = detect(text)
     except Exception:
         lang = "es"
+
     respuesta = get_faq_response(text, lang)
     if respuesta:
         await update.message.reply_text(respuesta)
     else:
-        await update.message.reply_text("esperame un momento ya te contesto")
+        opciones = [
+            "Interesante… cuéntame más. ¿Hablamos de viajes, ciencia o historia? 😉",
+            "Puedo contarte datos curiosos si me dices 'dato curioso' ✨",
+            "¿Te gustaría saber de planetas, animales o países? 🌎",
+            random.choice(GUSTOS),
+        ]
+        await update.message.reply_text(random.choice(opciones))
 
 def setup_handlers(app):
     app.add_handler(CommandHandler("start", start))
