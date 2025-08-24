@@ -76,11 +76,8 @@ def get_faq_response(text, lang):
     if lang in FAQ:
         for q, r in FAQ[lang].items():
             q_norm = normalize(q)
-            # Coincidencia si la clave está en el texto o el texto en la clave
-            if q_norm in text_norm or text_norm in q_norm:
-                return r() if callable(r) else r
-            # Coincidencia por palabras individuales
-            if any(q_norm == word for word in text_norm.split()):
+            # Coincidencia si la clave está en el texto normalizado
+            if q_norm in text_norm:
                 return r() if callable(r) else r
     return None
 
@@ -134,7 +131,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if respuesta:
         await update.message.reply_text(respuesta)
     else:
-        await update.message.reply_text("Lo siento, no tengo una respuesta para eso. Pregúntame otra cosa o usa /help.")
+        await update.message.reply_text("esperame un momento ya te contesto")
 
 def setup_handlers(app):
     app.add_handler(CommandHandler("start", start))
