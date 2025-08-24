@@ -14,7 +14,7 @@ PERSONALIDAD = (
 
 FAQ = {
     "es": {
-        "hola":"¡Hey! ¿Cómo va todo? 😄",
+        "hola":"¡Hey! ¿Cómo va todo? ",
         "buenos días": "¡Buenos días! ¿Cómo amaneciste?",
         "buenas tardes": "¡Buenas tardes! ¿Cómo va tu día?",
         "buenas noches": "¡Buenas noches! Que descanses.",
@@ -55,7 +55,8 @@ def get_faq_response(text, lang):
     text_norm = normalize(text)
     if lang in FAQ:
         for q, r in FAQ[lang].items():
-            if normalize(q) in text_norm or text_norm in normalize(q):
+            q_norm = normalize(q)
+            if q_norm in text_norm:
                 return r() if callable(r) else r
     return None
 
